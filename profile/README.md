@@ -1,4 +1,4 @@
-# 📑 Data Labeling Support System
+# 📑 Data Labeling Platform
 
 We'll cover the following
 + [🎯 Project Overview & Goals](#🎯-project-overview-goals)
