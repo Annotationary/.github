@@ -236,3 +236,29 @@ Top-level container for a labeling effort. Groups a dataset, assignemtns, guidel
 | project_status | ENUM | Active, Completed, Archived
 | created_at | DATETIME | Set on insert
 | updated_at | DATETIME | Updated via EF interceptor
+
+**Project Members**
+
+**Activity Logs**
+
+**Datasets**
+
+**Data_Items**
+
+**Labels**
+
+**Assignments**
+
+**Guidelines**
+
+**Tasks**
+
+**Task_Items**
+
+**Annotations**
+
+**Annotation_Labels**
+
+**Reviews**
+
+### 3. Migrations
