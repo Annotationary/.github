@@ -209,5 +209,20 @@ Ingress: Nginx Ingress Controller routes `app.yourdomain.com` → frontend, `api
 ### 2. Tables
 **Users**
 
-Stores all registered accounts. Role determines what routes and UI the user can access.
+Stores all registered accounts.
+| Column | Type | Notes |
+| --- | --- | -- |
+| user_id | VARCHAR(255) PK | 
+| username | VARCHAR(255) | 
+| email | VARCHAR(255) | 
+| password | VARCHAR(255) | 
+| profile_image | VARCHAR(255) | 
+| cover_image | VARCHAR(255) | 
+| role | ENUM | Admin, Manager, Annotator, Reviewer
+| specialization | VARCHAR(255) | Optional domain expertise tag
+| user_status | ENUM | Active, Inactive
+| created_at |
 
+**Project**
+| Column | Type | Notes |
+| --- | --- | -- |
