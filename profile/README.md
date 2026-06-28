@@ -210,19 +210,29 @@ Ingress: Nginx Ingress Controller routes `app.yourdomain.com` → frontend, `api
 **Users**
 
 Stores all registered accounts.
+
 | Column | Type | Notes |
 | --- | --- | -- |
 | user_id | VARCHAR(255) PK | 
-| username | VARCHAR(255) | 
-| email | VARCHAR(255) | 
-| password | VARCHAR(255) | 
-| profile_image | VARCHAR(255) | 
-| cover_image | VARCHAR(255) | 
+| username | VARCHAR(255) | Unique display name
+| email | VARCHAR(255) | Unique, used as login indentifier
+| password | VARCHAR(255) | bcrypt hash - never returned by API
+| profile_image | VARCHAR(255) | URL to profile image, nullable
+| cover_image | VARCHAR(255) | URL to cover image, nullable
 | role | ENUM | Admin, Manager, Annotator, Reviewer
 | specialization | VARCHAR(255) | Optional domain expertise tag
 | user_status | ENUM | Active, Inactive
-| created_at |
+| created_at | DATETIME | Set on insert
 
 **Project**
+
+Top-level container for a labeling effort. Groups a dataset, assignemtns, guidelines, and members under one context.
+
 | Column | Type | Notes |
-| --- | --- | -- |
+| --- | --- | --- |
+| project_id | VARCHAR(255) PK | 
+| project_name | VARCHAR(255) | 
+| description | VARCHAR(255) | Nullable
+| project_status | ENUM | Active, Completed, Archived
+| created_at | DATETIME | Set on insert
+| updated_at | DATETIME | Updated via EF interceptor
