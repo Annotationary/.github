@@ -238,16 +238,31 @@ Top-level container for a labeling effort. Groups a dataset, assignemtns, guidel
 | updated_at | DATETIME | Updated via EF interceptor
 
 **Project Members**
+| Column | Type | Notes |
+| --- | --- | --- |
+| project_member_id | VARCHAR(255) PK |
+| project_id | VARCHAR(255) FK -> project.project_id
+| user_id | VARCHAR(255) FK -> users.user_id 
 
 **Activity Logs**
+| Column | Type | Notes |
+| --- | --- | --- |
 
 **Datasets**
+| Column | Type | Notes |
+| --- | --- | --- |
 
 **Data_Items**
+| Column | Type | Notes |
+| --- | --- | --- |
 
 **Labels**
+| Column | Type | Notes |
+| --- | --- | --- |
 
 **Assignments**
+| Column | Type | Notes |
+| --- | --- | --- | 
 
 **Guidelines**
 
