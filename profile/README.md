@@ -245,10 +245,29 @@ Top-level container for a labeling effort. Groups a dataset, assignemtns, guidel
 | user_id | VARCHAR(255) FK -> users.user_id 
 
 **Activity Logs**
+
+Audit trail for all meaningful user actions in the system. Append-only — rows are never updated or deleted.
+
 | Column | Type | Notes |
 | --- | --- | --- |
+| log_id | VARCHAR(255) PK | 
+| user_id | VARCHAR(255) FK -> users.user_id | Who performed the action
+| activity_type | ENUM | e.g. Create, Upadte, Delete, Login, Export 
+| entity_type | ENUM | e.g. Project, Dataset, Task, Annotation
+| entity_name | VARCHAR(255) |Human-readable name of the affected entity
+| entity_id | VARCHAR(255) | ID of the affected entity
+| action | VARCHAR(255) | Short action label, e.g. status_changed
+| description | VARCHAR(255) | Human-readable summary of what happened
+| old_value | VARCHAR(255) | Previous value, for update events; nullable
+| new_value | VARCHAR(255) | New value, for update events; nullable
+| metadata | VARCHAR(255) | Extra JSON context; nullable
+| ip_address | VARCHAR(255) | Client IP at time of action
+| timestamp | TIMESTAMP | Set on insert
 
 **Datasets**
+
+A batch of raw data items (images or files) attached to a project. Each project has exactly one dataset.
+
 | Column | Type | Notes |
 | --- | --- | --- |
 
