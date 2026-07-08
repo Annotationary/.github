@@ -1,15 +1,15 @@
 # 📑 Data Labeling Platform
 
 We'll cover the following
-+ [Project Overview & Goals](#🎯-project-overview-goals)
-+ [Product Requirement](#)
-+ [System Design]()
++ [Project Overview & Goals](#project-overview)
++ [Product Requirement](#project-requirement)
++ [System Design](#system-design)
 + [API Contract]()
-+ [Local Dev Setup Guide]()
-+ [Database Schema]()
-+ [CI/CD RunBook]()
++ [Database Design](#database-design)
++ [Local Dev Setup Guide](#local-dev-setup-guide)
++ [CI/CD RunBook](#cicd-runbook)
 
-## 🎯 Project Overview & Goals
+## Project Overview
 This project aims to build a Data Labeling Support System for training and evaluating machine learning models. The system supports multiple labeling tasks, such as identifying objects in images, drawing bounding boxes around objects, and segmenting object regions. Its goal is to manage the entire data labeling lifecycle, from project creation and task assignment to labeling, quality review, and data export, ensuring high-quality labeled datasets that improve the accuracy and reliability of machine learning models.
 
 ## Project Requirement
@@ -490,3 +490,357 @@ Never edit a migration file after it has been applied to any shared environment.
 
 ### 5. Soft deletes
 `users` and `projects` use status-based soft disabling (`user_status = Inactive` / `project_status = Archived`). All other entities use hard deletes with cascade on the parent FK. EF Core global query filters exclude inactive/archived rows by default — pass `.IgnoreQueryFilters()` in admin queries that need to see them.
+
+## Local Dev Setup Guide
+Get the full stack running locally in ~20 minutes. You need Docker Desktop (or Docker Engine + Compose), Node.js 20+, and .NET 8 SDK.
+
+### 1. Prerequisites
+
+| Tool | Version | Check |
+|------|---------|-------|
+| Docker Desktop | Latest | `docker --version` |
+| Docker Compose | v2+ | `docker compose version` |
+| Node.js | 20+ | `node --version` |
+| .NET SDK | 8.0 | `dotnet --version` |
+| Git | Any | `git --version` |
+
+### 2. Clone the repos
+```bash
+# Create a workspace folder
+mkdir data-labeling && cd data-labeling
+ 
+# Clone both repos
+git clone https://github.com/your-org/backend.git
+git clone https://github.com/your-org/frontend.git
+git clone https://github.com/your-org/infra.git
+```
+
+### 3. Start infrastructure services
+The `infra` repo has a `docker-compose.yml` that starts PostgreSQL, Redis, and MinIO locally. This is the only Docker piece you need to run manually — the app services run natively for a faster dev loop.
+
+```bash
+cd infra
+docker compose up -d
+```
+
+This starts:
+- PostgreSQL on `localhost:5432`
+- Redis on `localhost:6379`
+- MinIO on `localhost:9000` (API) and `localhost:9001` (console UI)
+
+Verify everything is up:
+ 
+```bash
+docker compose ps
+```
+ 
+All three services should show `running`.
+ 
+**MinIO first-time setup:** Open `http://localhost:9001`, log in with `minioadmin / minioadmin`, create a bucket named `data-labeling`.
+
+### 4. Configure the backend
+```bash
+cd ../backend
+cp .env.example .env
+```
+ 
+Open `.env` and fill in:
+ 
+```env
+# Database
+ConnectionStrings__DefaultConnection=Host=localhost;Port=5432;Database=datalabeling;Username=postgres;Password=postgres
+ 
+# Redis
+Redis__ConnectionString=localhost:6379
+ 
+# MinIO / Object Storage
+Storage__Endpoint=localhost:9000
+Storage__AccessKey=minioadmin
+Storage__SecretKey=minioadmin
+Storage__BucketName=data-labeling
+Storage__UseSSL=false
+ 
+# JWT
+Jwt__SecretKey=your-local-dev-secret-min-32-chars-long
+Jwt__Issuer=data-labeling-api
+Jwt__Audience=data-labeling-frontend
+Jwt__AccessTokenExpiryMinutes=15
+Jwt__RefreshTokenExpiryDays=7
+ 
+# Environment
+ASPNETCORE_ENVIRONMENT=Development
+```
+ 
+Run database migrations:
+ 
+```bash
+dotnet ef database update
+```
+ 
+Seed the database with a default admin user and sample data:
+ 
+```bash
+dotnet run --project src/DataLabeling.Api -- --seed
+```
+ 
+Default seeded admin credentials:
+- Email: `admin@local.dev`
+- Password: `Admin1234!`
+Start the API:
+ 
+```bash
+dotnet run --project src/DataLabeling.Api
+```
+ 
+API is available at `http://localhost:5000`. Swagger UI at `http://localhost:5000/swagger`.
+ 
+Start the background worker (in a separate terminal):
+ 
+```bash
+dotnet run --project src/DataLabeling.Api -- --worker
+```
+
+### 5. Configure the frontend
+```bash
+cd ../frontend
+cp .env.local.example .env.local
+```
+ 
+Open `.env.local` and fill in:
+ 
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=any-local-secret-string
+```
+ 
+Install dependencies and start:
+ 
+```bash
+npm install
+npm run dev
+```
+ 
+Frontend is available at `http://localhost:3000`.
+
+### 6. Verify the setup
+ 
+Open `http://localhost:3000` and log in with `admin@local.dev` / `Admin1234!`.
+ 
+You should see the admin dashboard. Create a project, upload the sample ZIP from `infra/seed-data/sample-images.zip`, and verify tasks appear after ~10 seconds (the worker processes the upload).
+ 
+---
+ 
+### 7. Stopping everything
+ 
+```bash
+# Stop the Next.js dev server: Ctrl+C in its terminal
+# Stop the .NET API: Ctrl+C in its terminal
+# Stop the background worker: Ctrl+C in its terminal
+ 
+# Stop Docker services
+cd infra
+docker compose down
+```
+ 
+To wipe the database and start fresh:
+ 
+```bash
+docker compose down -v   # -v removes volumes
+docker compose up -d
+cd ../backend && dotnet ef database update && dotnet run --project src/DataLabeling.Api -- --seed
+```
+
+## CI/CD Runbook
+### 1. Repository and pipeline layout
+Each repo has its own Jenkinsfile at root. Pipelines are independent — a frontend change only triggers the frontend pipeline.
+
+| Repo | Jenkinsfile | What it builds |
+|------|------------|----------------|
+| `frontend` | `Jenkinsfile` | Next.js Docker image |
+| `backend` | `Jenkinsfile` | ASP.NET Core API + Worker Docker image |
+| `infra` | `Jenkinsfile` | Applies K8s manifests (no image build) |
+
+### 2. Pipeline stages
+ 
+#### 2.1 Frontend pipeline (`frontend/Jenkinsfile`)
+ 
+```
+Git checkout → Install deps → Lint → Build → Docker build → Docker push → Deploy to K8s
+```
+ 
+| Stage | Command | Failure behaviour |
+|-------|---------|-------------------|
+| Install deps | `npm ci` | Fail pipeline |
+| Lint | `npm run lint` | Fail pipeline |
+| Build | `npm run build` | Fail pipeline |
+| Docker build | `docker build -t registry.yourdomain.com/frontend:$GIT_SHA .` | Fail pipeline |
+| Docker push | `docker push ...` | Fail pipeline |
+| Deploy | `kubectl set image deployment/frontend-deployment frontend=...` | Fail pipeline, trigger alert |
+
+### 2.2 Backend pipeline (`backend/Jenkinsfile`)
+ 
+```
+Git checkout → Restore → Build → Test → Docker build → Docker push → Deploy to K8s
+```
+
+| Stage | Command | Failure behaviour |
+|-------|---------|-------------------|
+| Restore | `dotnet restore` | Fail pipeline |
+| Build | `dotnet build --no-restore -c Release` | Fail pipeline |
+| Test | `dotnet test --no-build` | Fail pipeline, PR blocked |
+| Docker build | `docker build -t registry.yourdomain.com/backend:$GIT_SHA .` | Fail pipeline |
+| Docker push | `docker push ...` | Fail pipeline |
+| Deploy API | `kubectl set image deployment/backend-deployment ...` | Fail pipeline, trigger alert |
+| Deploy Worker | `kubectl set image deployment/worker-deployment ...` | Fail pipeline, trigger alert |
+
+---
+
+### 3. Branch and environment mapping
+ 
+| Branch | Environment | Auto-deploy? |
+|--------|------------|--------------|
+| `main` | Production | Yes, on merge |
+| `staging` | Staging | Yes, on merge |
+| `dev` | Dev | Yes, on merge |
+| `feature/*` | — | CI only (no deploy) |
+ 
+Feature branches run all stages up to Docker push but skip the deploy stage. This lets you confirm the image builds before merging.
+ 
+---
+
+### 4. Image tagging strategy
+Images are tagged with the Git commit SHA:
+
+```
+registry.yourdomain.com/frontend:a3f9b2c
+registry.yourdomain.com/backend:a3f9b2c
+```
+
+Additionally, the branch name is applied as a floating tag:
+ 
+```
+registry.yourdomain.com/frontend:main
+registry.yourdomain.com/frontend:staging
+```
+
+K8s deployments always reference the SHA tag, never a floating tag. The SHA is recorded in the Jenkins build log for every deploy.
+
+---
+
+### 5. Kubernetes namespace layout
+ 
+```
+cluster
+├── namespace: production
+│   ├── frontend-deployment     (image: frontend:$SHA, replicas: 2)
+│   ├── backend-deployment      (image: backend:$SHA, replicas: 2)
+│   ├── worker-deployment       (image: backend:$SHA, replicas: 1)
+│   └── ingress                 (Nginx → frontend + backend services)
+├── namespace: staging
+│   ├── frontend-deployment     (replicas: 1)
+│   ├── backend-deployment      (replicas: 1)
+│   └── worker-deployment       (replicas: 1)
+├── namespace: dev
+│   ├── frontend-deployment     (replicas: 1)
+│   ├── backend-deployment      (replicas: 1)
+│   └── worker-deployment       (replicas: 1)
+└── namespace: infra            (shared across all envs)
+    ├── postgresql-statefulset
+    ├── redis-statefulset
+    └── minio-statefulset
+```
+
+Each environment has its own set of `ConfigMaps` and `Secrets`. Never share secrets between namespaces.
+ 
+---
+ 
+### 6. Triggering a deploy manually
+ 
+Sometimes you need to deploy without a code change (e.g. applying a config change or recovering after an incident).
+ 
+**Option A — Re-run the Jenkins build**
+ 
+Go to Jenkins → the relevant pipeline → click "Build Now". The pipeline will re-tag and re-apply the current `main` image.
+ 
+**Option B — kubectl directly**
+ 
+```bash
+# Force a rolling restart (picks up new ConfigMap values)
+kubectl rollout restart deployment/backend-deployment -n production
+ 
+# Deploy a specific image tag
+kubectl set image deployment/backend-deployment \
+  backend=registry.yourdomain.com/backend:a3f9b2c \
+  -n production
+ 
+# Watch the rollout
+kubectl rollout status deployment/backend-deployment -n production
+```
+ 
+---
+ 
+### 7. Rollback steps
+ 
+K8s keeps the previous ReplicaSet, so rollback is fast.
+ 
+```bash
+# Roll back to the previous revision
+kubectl rollout undo deployment/backend-deployment -n production
+ 
+# Roll back to a specific revision
+kubectl rollout history deployment/backend-deployment -n production
+kubectl rollout undo deployment/backend-deployment --to-revision=3 -n production
+ 
+# Confirm rollback completed
+kubectl rollout status deployment/backend-deployment -n production
+```
+ 
+After rolling back, identify the broken image SHA from the Jenkins build log and create a hotfix branch. Do not leave the deployment running on a rolled-back revision longer than necessary.
+ 
+---
+ 
+### 8. Health checks
+ 
+All deployments have `readinessProbe` and `livenessProbe` configured in the K8s manifests (`infra/k8s/`).
+ 
+- **Backend readiness:** `GET /health/ready` — returns 200 when the DB connection and Redis connection are alive.
+- **Backend liveness:** `GET /health/live` — returns 200 always; if the process is deadlocked this fails.
+- **Frontend readiness:** `GET /api/health` — Next.js built-in.
+Check health manually:
+ 
+```bash
+kubectl get pods -n production
+kubectl describe pod <pod-name> -n production
+kubectl logs <pod-name> -n production --tail=100
+```
+ 
+---
+ 
+## 9. Secrets management
+ 
+Secrets are stored as Kubernetes Secrets and mounted as environment variables. They are not committed to any repo.
+ 
+To update a secret:
+ 
+```bash
+kubectl create secret generic backend-secrets \
+  --from-literal=Jwt__SecretKey=new-value \
+  --namespace production \
+  --dry-run=client -o yaml | kubectl apply -f -
+ 
+# Restart the deployment to pick up the new secret
+kubectl rollout restart deployment/backend-deployment -n production
+```
+ 
+Keep a copy of all secret values in a shared password manager (e.g. Bitwarden) — not in any file, not in Slack.
+ 
+---
+ 
+## 10. Adding a new environment variable
+ 
+1. Add to `.env.example` in the relevant repo.
+2. Add to the K8s `ConfigMap` or `Secret` in `infra/k8s/<env>/`.
+3. Apply the ConfigMap: `kubectl apply -f infra/k8s/production/configmap.yaml`.
+4. Restart the relevant deployment.
+5. Update `local-dev-setup.md` with the new variable.
