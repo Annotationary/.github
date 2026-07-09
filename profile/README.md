@@ -100,16 +100,14 @@ Background Worker (ASP.NET Core hosted service)
 ### 2. Tech stack
 | Layer | Technology |
 | --- | --- |
-| Frontend |
-| Backend |
+| Frontend | React Vite
+| Backend | Springboot
 | ORM | 
-| Database | 
-| Object storge |
-| Cache / queue |
-| Auth |
-| Container runtime |
-| Orchestration |
-| CI/CD |
+| Database | MySQL
+| Object storage | SeaweedFS
+| Auth | JWT
+| Container runtime | Docker, Docker compose
+| CI/CD | Jenkins
 
 ### 3. Services
 #### 3.1 Frontend
