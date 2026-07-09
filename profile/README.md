@@ -102,7 +102,6 @@ Background Worker (ASP.NET Core hosted service)
 | --- | --- |
 | Frontend | React Vite
 | Backend | Springboot
-| ORM | 
 | Database | MySQL
 | Object storage | SeaweedFS
 | Auth | JWT
