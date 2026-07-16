@@ -33,6 +33,8 @@ Receives assigned tasks and annotates items — drawing bounding boxes, polygons
 
 Inspects submitted annotations for quality. Approves correct annotations or rejects them with written feedback that is sent back to the labeler. Has read access to all tasks in a project.
 
+![context-diagram](./resources/Context-diagram.drawio.svg)
+
 ### 3. Core features
 #### 3.1 Project management
 + Manager can create a project with a name, description, an annotation type (classification / bounding box / polygon / segmentation).
@@ -101,7 +103,7 @@ Background Worker (ASP.NET Core hosted service)
 | Layer | Technology |
 | --- | --- |
 | Frontend | React Vite
-| Backend | Springboot
+| Backend | ASAP .NET Core
 | Database | MySQL
 | Object storage | SeaweedFS
 | Auth | JWT
