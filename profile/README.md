@@ -139,7 +139,7 @@ Export generation: query approved annotations, serialize to COCO/CSV/JSON, uploa
 Picks up jobs from a Redis list. If a job fails, it retries up to 3 times with exponential backoff, then writes to a `failed_jobs` table.
 
 ### 4. Data flow - annotation lifecycle
-1. Manager uploads ZIP -> frontend requests presigned upload URL from API → browser streams ZIP to MinIO.
+1. Manager uploads ZIP -> frontend requests presigned upload URL from API → browser streams ZIP to SeaweedFS.
 2. API writes `Dataset` row, pushes a `process_dataset` job to Redis queue.
 3. Worker picks up job, extracts ZIP, creates one `Task` row per image, updates `Dataset.status = Ready`.
 4. Admin assigns tasks (API writes `Task.assignee_id`).

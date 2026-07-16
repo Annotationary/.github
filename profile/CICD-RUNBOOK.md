@@ -4,16 +4,16 @@ Each repo has its own Jenkinsfile at root. Pipelines are independent — a front
 
 | Repo | Jenkinsfile | What it builds |
 |------|------------|----------------|
-| `frontend` | `Jenkinsfile` | Next.js Docker image |
+| `frontend` | `Jenkinsfile` | React.js Docker image |
 | `backend` | `Jenkinsfile` | ASP.NET Core API + Worker Docker image |
-| `infra` | `Jenkinsfile` | Applies K8s manifests (no image build) |
+<!-- | `infra` | `Jenkinsfile` | Applies K8s manifests (no image build) | -->
 
 ## 2. Pipeline stages
  
 ### 2.1 Frontend pipeline (`frontend/Jenkinsfile`)
  
 ```
-Git checkout → Install deps → Lint → Build → Docker build → Docker push → Deploy to K8s
+Git checkout → Install deps → Lint → Build → Docker build → Docker push → Deploy to servers
 ```
  
 | Stage | Command | Failure behaviour |
@@ -23,7 +23,8 @@ Git checkout → Install deps → Lint → Build → Docker build → Docker pus
 | Build | `npm run build` | Fail pipeline |
 | Docker build | `docker build -t registry.yourdomain.com/frontend:$GIT_SHA .` | Fail pipeline |
 | Docker push | `docker push ...` | Fail pipeline |
-| Deploy | `kubectl set image deployment/frontend-deployment frontend=...` | Fail pipeline, trigger alert |
+| Deploy | `docker compose down && docker compose up --build` | Fail pipeline, trigger alert |
+<!-- | Deploy | `kubectl set image deployment/frontend-deployment frontend=...` | Fail pipeline, trigger alert | -->
 
 ## 2.2 Backend pipeline (`backend/Jenkinsfile`)
  
@@ -47,9 +48,9 @@ Git checkout → Restore → Build → Test → Docker build → Docker push →
  
 | Branch | Environment | Auto-deploy? |
 |--------|------------|--------------|
-| `main` | Production | Yes, on merge |
+| `main` | Production | Yes but require deploy confirm, on merge|
 | `staging` | Staging | Yes, on merge |
-| `dev` | Dev | Yes, on merge |
+| `develop` | Dev | Yes, on merge |
 | `feature/*` | — | CI only (no deploy) |
  
 Feature branches run all stages up to Docker push but skip the deploy stage. This lets you confirm the image builds before merging.
