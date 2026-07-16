@@ -88,16 +88,7 @@ API endpoint specs -> see Swagger at `/swagger`
 ### 1. Overview
 The system is a web application with a decoupled frontend and backend, deployed on Kubernetes. Users interact through a Next.js browser app. The Next.js app communicates exclusively with the ASP.NET Core REST API. The API handles business logic and persists data to PostgreSQL, stores raw assets in object storage, and uses Redis for session caching and background job queuing.
 
-```shell
-Browser (Next.js)
-      │  HTTPS/REST + JWT
-      ▼
-ASP.NET Core API  ──►  PostgreSQL   (relational data)
-      │           ──►  Object Store (images/files)
-      │           ──►  Redis        (sessions, job queue)
-      ▼
-Background Worker (ASP.NET Core hosted service)
-```
+![System-design-diagram](./resources/System-design-diagram.drawio.svg)
 
 ### 2. Tech stack
 | Layer | Technology |

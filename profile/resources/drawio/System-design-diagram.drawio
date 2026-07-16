@@ -1,0 +1,46 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.5 Chrome/138.0.7204.251 Electron/37.6.1 Safari/537.36" version="28.2.5">
+  <diagram name="Page-1" id="ufEVrq4HnTBEqystbEJM">
+    <mxGraphModel dx="983" dy="581" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="0znmBWkKOaHQF-fNtE0r-2" target="0znmBWkKOaHQF-fNtE0r-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-5" value="HTTPS/REST + JWT" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0znmBWkKOaHQF-fNtE0r-4">
+          <mxGeometry x="-0.0828" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-2" value="&lt;div&gt;Browser&lt;/div&gt;&lt;div&gt;React / Vite&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="0znmBWkKOaHQF-fNtE0r-3" target="0znmBWkKOaHQF-fNtE0r-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-8" value="SQL (EF Core)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0znmBWkKOaHQF-fNtE0r-7">
+          <mxGeometry x="-0.3683" y="1" relative="1" as="geometry">
+            <mxPoint x="-44" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-3" value="&lt;div&gt;Backend API&lt;/div&gt;.NET + EF Core" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="620" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-6" value="Database" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.database;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="140" y="770" width="90" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-9" value="&lt;div&gt;Object Storage&lt;/div&gt;&lt;div&gt;SeaweedFS Filer&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="810" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.462;entryY=0.035;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="0znmBWkKOaHQF-fNtE0r-3" target="0znmBWkKOaHQF-fNtE0r-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0znmBWkKOaHQF-fNtE0r-11" value="Presigned URL" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0znmBWkKOaHQF-fNtE0r-10">
+          <mxGeometry x="-0.0264" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
