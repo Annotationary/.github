@@ -219,7 +219,7 @@ dotnet ef migrations add <MigrationName>
  
 Never edit a migration file after it has been applied to any shared environment. Write a new migration instead.
 
-### 4. Additional database documents
+### 3. Additional database documents
 [-> More about database configurations](./DATABASE.md)
 
 ## Local Dev Setup Guide
