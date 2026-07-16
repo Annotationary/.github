@@ -194,7 +194,7 @@ Ingress: Nginx Ingress Controller routes `app.yourdomain.com` → frontend, `api
 
 ## Database Design
 ### 1. Entities overview
-<!-- ![ERD](/profile/resources/Annotationary_ERD.png) -->
+![ERD](/profile/resources/Annotationary_ERD.png)
 
 ### 2. Migrations
 EF Core migrations live in `/backend/Migrations/`. To apply:
